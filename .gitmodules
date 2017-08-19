@@ -1,3 +1,6 @@
 [submodule "love/libs/hump"]
 	path = love/libs/hump
 	url = https://github.com/vrld/hump
+[submodule "love/libs/middleclass"]
+	path = love/libs/middleclass
+	url = https://github.com/kikito/middleclass.git
