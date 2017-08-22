@@ -1,107 +1,79 @@
+--  https://github.com/ocornut/imgui/blob/master/imgui_demo.cpp
 require "imgui"
 
-local image = love.graphics.newImage("logo.png")
-
+require("clients.login")
+require("clients.musicPlayer")
+require("clients.about")
+require("clients.gameSelect")
+require("clients.inputTester")
+require("clients.screenFetch")
 
 function love.load()
-    sf = {}
-    getScreenfetchConfig()
-    textValue = ""
-
+    clients = {}
+    clients.musicPlayer = true
+    startTime = love.timer.getTime()
     screen = {
         W = love.graphics.getWidth(),
         H = love.graphics.getHeight()
     }
 
-    login = {
-        username = "",
-        password = "",
-        errorMsg = ""
-    }
+    inputTester_LOAD()
+    musicPlayer_LOAD()
+    about_LOAD()
+    gameSelect_LOAD()
+    screenFetch_LOAD()
 
-
-Client = require("src.client")
-test = Client:new("Title", {imgui.Text("tes")}, {x=10, y=10})
-
+    login_LOAD()
 end
 
 function love.update(dt)
+    require("libs.lovebird.lovebird").update()
     imgui.NewFrame()
 end
 
 function love.draw()
-    local status
-
-    test:draw()
-
-
-    imgui.SetNextWindowPos(screen.W/2-125, screen.H/2-50)
-    imgui.SetNextWindowSize(285, 80)
-    imgui.Begin("Login",  true, { "AlwaysAutoResize", "NoTitleBar" })
-        status, login.username = imgui.InputText("Username", login.username, 100, 100)
-        status, login.password = imgui.InputText("Password", login.password, 100, 100)
-        if imgui.Button("Enter") then
-            verifyAuthentication()
-        end
-        imgui.SameLine()
-        imgui.Text(login.errorMsg)
-    imgui.End()
-
+    local status -- ??
     love.graphics.clear(100, 100, 100, 255)
 
-    if userAuthenticated then
+    love.graphics.push()
+        love.graphics.scale(0.3, 0.3)         -- -sf.logo:getWidth()
+        love.graphics.draw(screenFetch.logo, screen.W*(1/0.3)-30, screen.H*(1/0.3)-screenFetch.logo:getHeight(), 0, -1, 1)
+    love.graphics.pop()
 
+    login_DRAW()
+
+    if userAuthenticated then
         -- Menu
         if imgui.BeginMainMenuBar() then
-            if imgui.BeginMenu("File") then
-                imgui.MenuItem("Test")
-                imgui.EndMenu()
-            elseif imgui.BeginMenu("Edit") then
-                imgui.MenuItem("Test")
-                imgui.EndMenu()
+            if (imgui.BeginMenu("Menu")) then
+                imgui.EndMenu();
+            end
+            if (imgui.BeginMenu("Applications")) then
+                if imgui.MenuItem("Game selector") then clients.gameSelect = not clients.gameSelect end
+                if imgui.MenuItem("Music Player") then clients.musicPlayer = not clients.musicPlayer end
+                if imgui.MenuItem("screenFetch") then clients.screenFetch = not clients.screenFetch end
+                if imgui.MenuItem("Input tester") then clients.inputTester = not clients.inputTester end
+                imgui.EndMenu();
+            end
+            if (imgui.BeginMenu("Help")) then
+                    if imgui.MenuItem("About") then clients.about = not clients.about end
+                    if imgui.MenuItem("Demo") then clients.demo = not clients.demo end
+                imgui.EndMenu();
             end
             imgui.EndMainMenuBar()
         end
 
-        -- Screenfetch
-        imgui.SetNextWindowSize(510, 227)
-    	imgui.Begin("screenfetch", true)
-            imgui.Image(image, 200, 200)
-            imgui.SameLine()
-            imgui.BeginChild(1)
-        	    imgui.Text(sf.USER)
-        	    imgui.Text("---------------------")
-        		imgui.Text("OS: " 			.. sf.OS)
-        	    imgui.Text("Uptime: " 		.. sf.UPTIME)
-        	    imgui.Text("Packages: " 	.. sf.PACKAGES)
-        	    imgui.Text("Resolution: " 	.. love.graphics.getWidth() .. "x" .. love.graphics.getHeight())
-        	    imgui.Text("WM: " 			.. "PiSP WM")
-        	    imgui.Text("CPU: " 			.. sf.CPU)
-        	    imgui.Text("RAM: "			.. sf.RAM)
-        	    imgui.Text("MEM: " 			.. string.sub(collectgarbage("count")/1024, 1, 5) .. "MB")
-        	    imgui.Text("FPS: "			.. tostring(love.timer.getFPS()))
-            imgui.EndChild()
-    	imgui.End()
+        inputTester_DRAW()
+        gameSelect_DRAW()
+        about_DRAW()
+        musicPlayer_DRAW()
+        screenFetch_DRAW()
+        if clients.demo then
+            imgui.ShowTestWindow(true)
+        end
 
     end
     imgui.Render()
-end
-
-function verifyAuthentication()
-    if login.username == "meme" and login.password == "meme" then
-        userAuthenticated = true
-    else
-        login.errorMsg = "Invalid credentials!"
-    end
-end
-
-function getScreenfetchConfig()
-    sf.USER = io.popen ("echo $USER"):read() .. "@" .. io.popen ("uname -n"):read()
-	sf.OS = io.popen ("cat /etc/issue |cut -c -7"):read() .. io.popen ("uname -o"):read()
-	sf.UPTIME = io.popen ("uptime -p | cut -c4-"):read()
-	sf.PACKAGES = io.popen("dpkg -l | grep -c '^ii'" ):read()
-	sf.CPU = io.popen(" cat /proc/cpuinfo | grep 'model name' | uniq | cut -c14-"):read()
-	sf.RAM = string.sub(io.popen("grep MemAvail /proc/meminfo | awk '{print $2}'"):read()/1024, 1, 7) .. "MB"
 end
 
 function love.quit()
@@ -120,6 +92,7 @@ end
 function love.keypressed(key)
     imgui.KeyPressed(key)
     if not imgui.GetWantCaptureKeyboard() then
+        inputTesterKeys[#inputTesterKeys+1] = {key, love.timer.getTime()}
     end
 end
 
@@ -136,6 +109,7 @@ function love.mousemoved(x, y)
 end
 
 function love.mousepressed(x, y, button)
+    inputTesterKeys[#inputTesterKeys+1] = {"mouse " .. button, love.timer.getTime()}
     imgui.MousePressed(button)
     if not imgui.GetWantCaptureMouse() then
     end
@@ -152,3 +126,4 @@ function love.wheelmoved(x, y)
     if not imgui.GetWantCaptureMouse() then
     end
 end
+
