@@ -6,11 +6,10 @@ function screenFetch_LOAD()
 end
 
 function screenFetch_DRAW()
-    -- Screenfetch
+    setFullscreen()
     if clients.screenFetch then
-        imgui.SetNextWindowSize(510, 227)
-    	status, clients.screenfetch = imgui.Begin("screenFetch", true)
-            imgui.Image(screenFetch.logo, 200, 200)
+    	status, clients.screenFetch = imgui.Begin("screenFetch", true, {"AlwaysAutoResize"})
+            imgui.Image(screenFetch.logo, 100, 100)
             imgui.SameLine()
             imgui.BeginChild(1)
         	    imgui.Text(screenFetch.USER)

@@ -5,6 +5,8 @@ Open-source PSP like console.
 - KiCAD schematics
 - Notes
 
+![PiSP](PiSP.png)
+
 ## To install imgui
 Gotta compile the binary from sauce for the newest versions
 ```shell

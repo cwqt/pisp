@@ -7,23 +7,30 @@ require("clients.about")
 require("clients.gameSelect")
 require("clients.inputTester")
 require("clients.screenFetch")
+require("clients.imguiMetrics")
+require("clients.console")
 
 function love.load()
-    clients = {}
-    clients.musicPlayer = true
     startTime = love.timer.getTime()
+    clients = {}
+    PiSP = {
+        version = 0.2
+    }
     screen = {
         W = love.graphics.getWidth(),
         H = love.graphics.getHeight()
     }
 
+    console_LOAD()
     inputTester_LOAD()
     musicPlayer_LOAD()
     about_LOAD()
     gameSelect_LOAD()
     screenFetch_LOAD()
-
     login_LOAD()
+
+    imgui.SetGlobalFontFromFileTTF("tiny.ttf", 8, 1, 1)
+    clients.musicPlayer = true
 end
 
 function love.update(dt)
@@ -32,12 +39,15 @@ function love.update(dt)
 end
 
 function love.draw()
+    -- Remove rounded corners for all windows
+    imgui.PushStyleVar("WindowRounding", 0)
+
     local status -- ??
     love.graphics.clear(100, 100, 100, 255)
 
     love.graphics.push()
-        love.graphics.scale(0.3, 0.3)         -- -sf.logo:getWidth()
-        love.graphics.draw(screenFetch.logo, screen.W*(1/0.3)-30, screen.H*(1/0.3)-screenFetch.logo:getHeight(), 0, -1, 1)
+        love.graphics.scale(0.2, 0.2)         -- -sf.logo:getWidth()
+        love.graphics.draw(screenFetch.logo, screen.W*(1/0.2)-30, screen.H*(1/0.2)-screenFetch.logo:getHeight(), 0, -1, 1)
     love.graphics.pop()
 
     login_DRAW()
@@ -46,6 +56,11 @@ function love.draw()
         -- Menu
         if imgui.BeginMainMenuBar() then
             if (imgui.BeginMenu("Menu")) then
+                    if imgui.MenuItem("Console") then clients.console = true end
+                    if imgui.MenuItem("Metrics") then clients.imguiMetrics = true end
+                    imgui.Separator();
+                    if imgui.MenuItem("Log out") then userAuthenticated = false end
+                    if imgui.MenuItem("Quit") then love.quit() end
                 imgui.EndMenu();
             end
             if (imgui.BeginMenu("Applications")) then
@@ -63,6 +78,8 @@ function love.draw()
             imgui.EndMainMenuBar()
         end
 
+        console_DRAW()
+        imguiMetrics_DRAW()
         inputTester_DRAW()
         gameSelect_DRAW()
         about_DRAW()
@@ -71,9 +88,14 @@ function love.draw()
         if clients.demo then
             imgui.ShowTestWindow(true)
         end
-
+    else -- Not authenticated
+        for k,v in ipairs(clients) do
+            print(v)
+        end
     end
+    imgui.PopStyleVar()
     imgui.Render()
+
 end
 
 function love.quit()
@@ -127,3 +149,7 @@ function love.wheelmoved(x, y)
     end
 end
 
+function setFullscreen()
+    imgui.SetNextWindowPos(0, 14)
+    imgui.SetNextWindowSize(love.graphics.getWidth(), love.graphics.getHeight()-14)
+end

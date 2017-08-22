@@ -12,11 +12,12 @@ function gameSelect_LOAD()
 end
 
 function gameSelect_DRAW()
+    setFullscreen()
     if clients.gameSelect then
-        status, clients.gameSelect = imgui.Begin("Game select", true)
+        status, clients.gameSelect = imgui.Begin("Game select", true, {"AlwaysAutoResize"})
             imgui.Columns(2);
             for k, game in ipairs(games) do
-                if imgui.Button(game[1], imgui.GetColumnWidth()-10, 40 ) then
+                if imgui.Button(game[1], imgui.GetColumnWidth()-10, 20 ) then
                     gameselect.title = game[1]
                     gameselect.description = game[2] or "No description"
                     gameselect.tags = game[3] or "No tags"

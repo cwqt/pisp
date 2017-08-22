@@ -12,10 +12,12 @@ function login_LOAD()
 end
 
 function login_DRAW()
-    -- Log in
-    imgui.SetNextWindowPos(screen.W/2-142.5, screen.H/2-50)
-    imgui.SetNextWindowSize(285, 80)
     if not userAuthenticated then
+        imgui.SetNextWindowPos(5, 5)
+        imgui.Begin("PiSP OS",  false, { "AlwaysAutoResize", "NoTitleBar" })
+            imgui.Text("PiSP OS")
+        imgui.End()
+        imgui.SetNextWindowPos(5, 38)
         imgui.Begin("Login",  false, { "AlwaysAutoResize", "NoTitleBar" })
             -- Set focus to input on startup
             if not imgui.IsAnyItemActive() then
@@ -28,6 +30,11 @@ function login_DRAW()
             end
             imgui.SameLine()
             imgui.Text(login.errorMsg)
+        imgui.End()
+
+        imgui.SetNextWindowPos(5, 208)
+        imgui.Begin("Version",  false, { "AlwaysAutoResize", "NoTitleBar" })
+            imgui.TextWrapped("v" ..PiSP.version)
         imgui.End()
     end
 end

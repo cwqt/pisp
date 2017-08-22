@@ -1,7 +1,7 @@
 function musicPlayer_LOAD()
     music = {
         currentTrackKey = 1,
-        volume = 0.5,
+        volume = 0.8,
         currentTime = 0,
         currentlyPlaying = "",
         currentTitle = "",
@@ -16,23 +16,25 @@ function musicPlayer_LOAD()
 end
 
 function musicPlayer_DRAW()
+    setFullscreen()
     if clients.musicPlayer then
-        status, clients.musicPlayer = imgui.Begin("Music", true, {"NoResize"})
+        status, clients.musicPlayer = imgui.Begin("Music", true, {"AlwaysAutoResize"})
 
             status, music.searchQuery = imgui.InputText("", music.searchQuery, 100, 100)
             imgui.SameLine()
             if imgui.Button("Search") then
-
             end
 
             imgui.Text("Directory: music/")
             imgui.Separator()
 
-            imgui.BeginChild("one", imgui.GetWindowContentRegionWidth(), 120, false, {"HorizontalScrollbar", "NoBorder"})
+
+            imgui.BeginChild("one", imgui.GetWindowContentRegionWidth(), 92, false, {"HorizontalScrollbar", "NoBorder"})
             imgui.SetScrollHere();
             for i, filename in ipairs(music.tracks) do
-                if imgui.Selectable(filename[1]) then
+                if imgui.Selectable(filename[1], music.test, {"SpanAllColumns"}) then
                     -- Stop the other tracks if one is playing
+                    imgui.NextColumn()
                     muteAllOtherTracks()
                     -- Change over to the new track
                     music.currentTrackKey = i

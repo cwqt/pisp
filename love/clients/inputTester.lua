@@ -3,10 +3,9 @@ function inputTester_LOAD()
 end
 
 function inputTester_DRAW()
-    -- Input tester game
+    setFullscreen()
     if clients.inputTester then
-        imgui.SetNextWindowSize(200, 500)
-        status, clients.inputTester = imgui.Begin("inputTester", true)
+        status, clients.inputTester = imgui.Begin("inputTester", true, {"AlwaysAutoResize"})
         imgui.Text("Logged: " .. #inputTesterKeys)
         imgui.SameLine(imgui.GetWindowWidth()-62)
         if imgui.Button("Clear") then
