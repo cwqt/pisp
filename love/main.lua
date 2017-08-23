@@ -11,6 +11,7 @@ require("clients.imguiMetrics")
 require("clients.console")
 
 function love.load()
+    wallpaper = love.graphics.newImage("wallpaper.png")
     startTime = love.timer.getTime()
     clients = {}
     PiSP = {
@@ -30,7 +31,7 @@ function love.load()
     login_LOAD()
 
     imgui.SetGlobalFontFromFileTTF("tiny.ttf", 8, 1, 1)
-    clients.musicPlayer = true
+    clients.console = true
 end
 
 function love.update(dt)
@@ -46,9 +47,10 @@ function love.draw()
     love.graphics.clear(100, 100, 100, 255)
 
     love.graphics.push()
-        love.graphics.scale(0.2, 0.2)         -- -sf.logo:getWidth()
-        love.graphics.draw(screenFetch.logo, screen.W*(1/0.2)-30, screen.H*(1/0.2)-screenFetch.logo:getHeight(), 0, -1, 1)
+        love.graphics.scale(0.18)
+        love.graphics.draw(wallpaper, 0, 0)
     love.graphics.pop()
+    love.graphics.print("PiSP OS", screen.W-50, screen.H-15)
 
     login_DRAW()
 

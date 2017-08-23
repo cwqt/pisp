@@ -1,9 +1,8 @@
 function console_LOAD()
 	console = {
-		submittedCommand = "",
-		returned = {
-			{ from="user", command="ls" }
-		}
+		currentCommand = "",
+		commands = {},
+		returned = {},
 	}
 end
 
@@ -12,13 +11,41 @@ function console_DRAW()
 		setFullscreen()
 		status, clients.console = imgui.Begin("Console", true, {"AlwaysAutoResize"})
 
-		for k, command in ipairs(console.returned) do
-			if command.from == "user" then
-				imgui.Text("> " .. command.command)
+		imgui.BeginChild("10", imgui.GetWindowWidth(), 180)
+		for i=1, #console.commands do
+			imgui.Text(console.commands[i])
+			-- Stop making newlines for commands with no stdout
+			if console.returned[i] ~= "" then
+				imgui.Text(console.returned[i])
 			end
+			imgui.SetScrollHere()
 		end
+		imgui.EndChild()
 
-		status, console.submittedCommand = imgui.InputText("", console.submittedCommand, 100)
+		consoleEntered, console.currentCommand = imgui.InputText("", console.currentCommand, 100, {"EnterReturnsTrue"})
+		imgui.SetKeyboardFocusHere(-1);
+		if consoleEntered then
+			if console.currentCommand == "clear" then
+				console.commands = {}
+				console.returned = {}
+			elseif console.currentCommand == "exit" then
+				clients.console = false
+				console.commands = {}
+				console.returned = {}
+			else
+				executeCommand(console.currentCommand)
+				table.insert(console.commands, "> " .. console.currentCommand)
+			end
+			console.currentCommand = ""
+		end
 		imgui.End()
 	end
+end
+
+function executeCommand(command)
+	-- Possible add threading?
+	local file = assert(io.popen(command))
+	local output = file:read('*all')
+	table.insert(console.returned, output)
+	file:close()
 end

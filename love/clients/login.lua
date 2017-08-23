@@ -31,11 +31,6 @@ function login_DRAW()
             imgui.SameLine()
             imgui.Text(login.errorMsg)
         imgui.End()
-
-        imgui.SetNextWindowPos(5, 208)
-        imgui.Begin("Version",  false, { "AlwaysAutoResize", "NoTitleBar" })
-            imgui.TextWrapped("v" ..PiSP.version)
-        imgui.End()
     end
 end
 
