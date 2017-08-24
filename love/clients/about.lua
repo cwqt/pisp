@@ -7,6 +7,7 @@ function about_DRAW()
     if clients.about then
         status, clients.about = imgui.Begin("About PiSP", true, {"AlwaysAutoResize"})
             imgui.SameLine(45) -- push text to center
+--[[
             imgui.Text(
             "ooooooooo.  o8o   .oooooo..o  ooooooooo.  \n"..
             "`888   `Y88.  `''  d8P'    `Y8   `888   `Y88.\n"..
@@ -14,7 +15,7 @@ function about_DRAW()
             " 888ooo88P' `888    `'Y8888o.   888ooo88P' \n"..
             " 888          888       `'Y88b  888        \n"..
             " 888          888  oo     .d8P  888        \n"..
-            "o888o        o888o 8''88888P'  o888o\n")
+            "o888o        o888o 8''88888P'  o888o\n")]]
             imgui.Text("PiSP OS v." .. PiSP.version)
             imgui.Separator()
             imgui.BeginChild(1)
@@ -30,7 +31,7 @@ function about_DRAW()
                 imgui.BulletText('Adafruit 2.2" 18-bit color TFT LCD')
                 imgui.BulletText("Mini 2-Axis Analog Thumbstick")
 
-                imgui.Text("Global Font is tiny.tff, http://www.dafont.com/tiny.font")
+                imgui.Text("Font: GohuFont, http://font.gohu.org/")
                 imgui.Text("\n 19/08/17 - Software released under MIT")
             imgui.EndChild()
         imgui.End()

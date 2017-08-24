@@ -9,6 +9,9 @@ require("clients.inputTester")
 require("clients.screenFetch")
 require("clients.imguiMetrics")
 require("clients.console")
+require("clients.fileManager")
+require("clients.editor")
+require("clients.feh")
 
 function love.load()
     wallpaper = love.graphics.newImage("wallpaper.png")
@@ -22,6 +25,9 @@ function love.load()
         H = love.graphics.getHeight()
     }
 
+    feh_LOAD()
+    editor_LOAD()
+    fileManager_LOAD()
     console_LOAD()
     inputTester_LOAD()
     musicPlayer_LOAD()
@@ -30,8 +36,8 @@ function love.load()
     screenFetch_LOAD()
     login_LOAD()
 
-    imgui.SetGlobalFontFromFileTTF("tiny.ttf", 8, 1, 1)
-    clients.console = true
+    clients.fileManager = true
+    imgui.SetGlobalFontFromFileTTF("gohu.ttf", 11, 1, 1)
 end
 
 function love.update(dt)
@@ -47,22 +53,36 @@ function love.draw()
     love.graphics.clear(100, 100, 100, 255)
 
     love.graphics.push()
-        love.graphics.scale(0.18)
+        love.graphics.scale(0.6)
         love.graphics.draw(wallpaper, 0, 0)
     love.graphics.pop()
-    love.graphics.print("PiSP OS", screen.W-50, screen.H-15)
 
     login_DRAW()
 
     if userAuthenticated then
         -- Menu
         if imgui.BeginMainMenuBar() then
-            if (imgui.BeginMenu("Menu")) then
+            if imgui.BeginMenu("Menu") then
+                    if imgui.MenuItem("Files") then clients.fileManager = true end
+                    if imgui.MenuItem("Editor") then clients.editor = true end
                     if imgui.MenuItem("Console") then clients.console = true end
                     if imgui.MenuItem("Metrics") then clients.imguiMetrics = true end
                     imgui.Separator();
                     if imgui.MenuItem("Log out") then userAuthenticated = false end
-                    if imgui.MenuItem("Quit") then love.quit() end
+                    if imgui.BeginMenu("Power") then
+                        -- systemD has its uses...
+                        if imgui.MenuItem("Shutdown") then
+                            os.execute("systemctl poweroff")
+                        end
+                        if imgui.MenuItem("Restart") then
+                            os.execute("systemctl reboot")
+                        end
+                        if imgui.MenuItem("Sleep") then
+                            os.execute("systemctl suspend")
+                        end
+                        imgui.EndMenu()
+                    end
+                    if imgui.MenuItem("Quit PiSPOS") then love.quit() end
                 imgui.EndMenu();
             end
             if (imgui.BeginMenu("Applications")) then
@@ -80,6 +100,9 @@ function love.draw()
             imgui.EndMainMenuBar()
         end
 
+        feh_DRAW()
+        editor_DRAW()
+        fileManager_DRAW()
         console_DRAW()
         imguiMetrics_DRAW()
         inputTester_DRAW()
@@ -87,6 +110,7 @@ function love.draw()
         about_DRAW()
         musicPlayer_DRAW()
         screenFetch_DRAW()
+
         if clients.demo then
             imgui.ShowTestWindow(true)
         end
@@ -152,6 +176,6 @@ function love.wheelmoved(x, y)
 end
 
 function setFullscreen()
-    imgui.SetNextWindowPos(0, 14)
-    imgui.SetNextWindowSize(love.graphics.getWidth(), love.graphics.getHeight()-14)
+    imgui.SetNextWindowPos(0, 17)
+    imgui.SetNextWindowSize(love.graphics.getWidth(), love.graphics.getHeight()-17)
 end

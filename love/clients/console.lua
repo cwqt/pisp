@@ -11,18 +11,20 @@ function console_DRAW()
 		setFullscreen()
 		status, clients.console = imgui.Begin("Console", true, {"AlwaysAutoResize"})
 
-		imgui.BeginChild("10", imgui.GetWindowWidth(), 180)
+		imgui.BeginChild("10", imgui.GetWindowWidth(), 165)
 		for i=1, #console.commands do
-			imgui.Text(console.commands[i])
+			imgui.TextWrapped(console.commands[i])
 			-- Stop making newlines for commands with no stdout
 			if console.returned[i] ~= "" then
-				imgui.Text(console.returned[i])
+				imgui.TextWrapped(console.returned[i])
 			end
-			imgui.SetScrollHere()
 		end
+		imgui.SetScrollHere()
 		imgui.EndChild()
 
-		consoleEntered, console.currentCommand = imgui.InputText("", console.currentCommand, 100, {"EnterReturnsTrue"})
+		imgui.PushItemWidth(imgui.GetWindowWidth()-15)
+			consoleEntered, console.currentCommand = imgui.InputText("", console.currentCommand, 300, {"EnterReturnsTrue"})
+		imgui.PopItemWidth()
 		imgui.SetKeyboardFocusHere(-1);
 		if consoleEntered then
 			if console.currentCommand == "clear" then
@@ -44,7 +46,8 @@ end
 
 function executeCommand(command)
 	-- Possible add threading?
-	local file = assert(io.popen(command))
+	-- https://www.lua.org/pil/21.2.html
+	local file = assert(io.popen(command, "r"))
 	local output = file:read('*all')
 	table.insert(console.returned, output)
 	file:close()

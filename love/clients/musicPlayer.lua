@@ -20,6 +20,7 @@ function musicPlayer_DRAW()
     if clients.musicPlayer then
         status, clients.musicPlayer = imgui.Begin("Music", true, {"AlwaysAutoResize"})
 
+            --[[
             status, music.searchQuery = imgui.InputText("", music.searchQuery, 100, 100)
             imgui.SameLine()
             if imgui.Button("Search") then
@@ -27,10 +28,10 @@ function musicPlayer_DRAW()
 
             imgui.Text("Directory: music/")
             imgui.Separator()
+            ]]
 
-
-            imgui.BeginChild("one", imgui.GetWindowContentRegionWidth(), 92, false, {"HorizontalScrollbar", "NoBorder"})
-            imgui.SetScrollHere();
+            imgui.BeginChild("one", imgui.GetWindowContentRegionWidth(), 100, false, {"HorizontalScrollbar", "NoBorder"})
+            --imgui.SetScrollHere();
             for i, filename in ipairs(music.tracks) do
                 if imgui.Selectable(filename[1], music.test, {"SpanAllColumns"}) then
                     -- Stop the other tracks if one is playing
