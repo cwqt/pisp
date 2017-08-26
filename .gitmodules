@@ -1,8 +1,8 @@
 [submodule "OS/libs/flux"]
 	path = OS/libs/flux
 	url = https://github.com/rxi/flux.git
-[submodule "OS/libs/bump.lua"]
-	path = OS/libs/bump.lua
+[submodule "OS/libs/bump"]
+	path = OS/libs/bump
 	url = https://github.com/kikito/bump.lua.git
 [submodule "OS/libs/shine"]
 	path = OS/libs/shine

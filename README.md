@@ -5,7 +5,7 @@ Open-source PSP like console.
 - PiSPOS
 - Notes
 
-![PiSP](PiSP.png)
+![PiSP](PiSP.gif)
 
 ## Installation
 ```
