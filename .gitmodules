@@ -1,6 +1,15 @@
-[submodule "love/libs/hump"]
-	path = love/libs/hump
+[submodule "OS/libs/flux"]
+	path = OS/libs/flux
+	url = https://github.com/rxi/flux.git
+[submodule "OS/libs/bump.lua"]
+	path = OS/libs/bump.lua
+	url = https://github.com/kikito/bump.lua.git
+[submodule "OS/libs/shine"]
+	path = OS/libs/shine
+	url = https://github.com/vrld/shine.git
+[submodule "OS/libs/lovebird"]
+	path = OS/libs/lovebird
+	url = https://github.com/rxi/lovebird.git
+[submodule "OS/libs/hump"]
+	path = OS/libs/hump
 	url = https://github.com/vrld/hump
-[submodule "love/libs/middleclass"]
-	path = love/libs/middleclass
-	url = https://github.com/kikito/middleclass.git

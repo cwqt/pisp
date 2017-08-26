@@ -1,3 +1,2 @@
 #!/bin/bash
-exec awesome
-
+exec love ~/PiSP/OS/
