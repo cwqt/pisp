@@ -27,7 +27,7 @@ function PiSPOS:init()
     startTime = love.timer.getTime()
     imgui.SetGlobalFontFromFileTTF("gohu.ttf", 11, 1, 1)
     PiSP = {
-        version = "0.3.3",
+        version = "0.3.4",
 		wallpaper = love.graphics.newImage("wallpaper.png")
     }
 end
