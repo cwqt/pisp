@@ -3,6 +3,15 @@
 require "imgui"
 Gamestate = require("libs.hump.gamestate")
 
+--[[
+    for the record I really despise programming like this,
+    normally I would OOP-ise each client but since imgui is
+    immediate mode and love-imgui is a hacked on module
+    it's not possible - also don't fuck me for using systemD.
+
+    thus, beware ye who enter...
+]]
+
 require("games.pong")
 
 require("clients.login")
@@ -17,12 +26,13 @@ require("clients.fileManager")
 require("clients.editor")
 require("clients.feh")
 
-PiSPOS = {}
 clients = {}
 screen = {
     W = love.graphics.getWidth(),
     H = love.graphics.getHeight()
 }
+
+PiSPOS = {}
 function PiSPOS:init()
     startTime = love.timer.getTime()
     imgui.SetGlobalFontFromFileTTF("gohu.ttf", 11, 1, 1)
@@ -33,6 +43,7 @@ function PiSPOS:init()
 end
 
 function PiSPOS:enter()
+    -- screaming
     feh_LOAD()
     editor_LOAD()
     fileManager_LOAD()
@@ -52,7 +63,6 @@ function PiSPOS:update(dt)
 end
 
 function PiSPOS:draw()
-    -- Remove rounded corners for all windows
     imgui.PushStyleVar("WindowRounding", 0)
 
     local status -- ??
@@ -107,6 +117,7 @@ function PiSPOS:draw()
             imgui.EndMainMenuBar()
         end
 
+        -- more screaming
         feh_DRAW()
         editor_DRAW()
         fileManager_DRAW()
@@ -122,9 +133,7 @@ function PiSPOS:draw()
             imgui.ShowTestWindow(true)
         end
     else -- Not authenticated
-        for k,v in ipairs(clients) do
-            print(v)
-        end
+        muteAllOtherTracks()
     end
     imgui.PopStyleVar()
     imgui.Render()
@@ -141,7 +150,7 @@ function love.load()
 end
 
 function love.update()
-    --require("libs.lovebird.lovebird").update()
+    require("libs.lovebird.lovebird").update()
 end
 
 function love.draw()
