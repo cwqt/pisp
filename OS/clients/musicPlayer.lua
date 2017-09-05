@@ -11,7 +11,8 @@ function musicPlayer_LOAD()
     }
 
     for k, filename in ipairs(music.files) do
-        music.tracks[#music.tracks+1] = {filename, track=love.audio.newSource("music/" .. filename)}
+        -- Insert all tracks and show them all
+        music.tracks[#music.tracks+1] = {filename, track=love.audio.newSource("music/" .. filename, show=true)}
     end
 end
 
@@ -20,26 +21,36 @@ function musicPlayer_DRAW()
     if clients.musicPlayer then
         status, clients.musicPlayer = imgui.Begin("Music", true, {"AlwaysAutoResize"})
 
-            --[[
+            -- Create a search bar and search button
             status, music.searchQuery = imgui.InputText("", music.searchQuery, 100, 100)
             imgui.SameLine()
+
             if imgui.Button("Search") then
+                for k, filename in ipairs(music.tracks)
+                    -- Filter results by checking against current search contents
+                    if string.match(filename[1], music.searchQuery) then
+                        filename.show = true
+                    else
+                        filename.show = false
+                    end
+                end
             end
 
             imgui.Text("Directory: music/")
             imgui.Separator()
-            ]]
 
             imgui.BeginChild("one", imgui.GetWindowContentRegionWidth(), 110, false, {"HorizontalScrollbar", "NoBorder"})
             --imgui.SetScrollHere();
             for i, filename in ipairs(music.tracks) do
-                if imgui.Selectable(filename[1], music.test, {"SpanAllColumns"}) then
-                    -- Stop the other tracks if one is playing
-                    imgui.NextColumn()
-                    muteAllOtherTracks()
-                    -- Change over to the new track
-                    music.currentTrackKey = i
-                    filename.track:play()
+                if filename.show then
+                    if imgui.Selectable(filename[1], music.test, {"SpanAllColumns"}) then
+                        -- Stop the other tracks if one is playing
+                        imgui.NextColumn()
+                        muteAllOtherTracks()
+                        -- Change over to the new track
+                        music.currentTrackKey = i
+                        filename.track:play()
+                    end
                 end
             end
             imgui.EndChild()
