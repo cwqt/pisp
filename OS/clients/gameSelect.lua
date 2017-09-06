@@ -6,7 +6,7 @@ function gameSelect_LOAD()
         state = ""
     }
     games = {
-        {"Pong", pong, "A retro pong game where you play as a paddle hitting a ball", "Arcade, Retro, Casual"},
+        {"Pong", pong, "A retro pong game where you play as a paddle hitting a ball", {"Arcade", "Retro", "Casual"},
     }
 end
 
@@ -27,7 +27,22 @@ function gameSelect_DRAW()
             imgui.BeginChild(1)
             imgui.Text(gameselect.title)
             imgui.TextWrapped(gameselect.description)
-            imgui.TextWrapped(gameselect.tags)
+
+            -- Show the tags
+            if type(gameselect.tags) == "table" then
+                for i, tag in ipairs(gameselect.tags) do
+                    imgui.SameLine()
+                    -- Only show commas on every tag except the last
+                    if i ~= #gameselect.tags then
+                        imgui.Text(tag .. ", ")
+                    else
+                        imgui.Text(tag)                        
+                    end
+                end
+            else -- "No tags", probably
+                imgui.TextWrapped(gameselect.tags)
+            end
+
             if gameselect.title ~= "" then
                 if imgui.Button("Play", 50, 30) then
                     Gamestate.switch(gameselect.state)
