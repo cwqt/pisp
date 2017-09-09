@@ -21,6 +21,7 @@ sudo apt-get install xdotool xev
 
 echo "Compiling LÖVE from source"
 sudo apt-get install build-essential autotools-dev automake libtool pkg-config libdevil-dev libfreetype6-dev libluajit-5.1-dev libphysfs-dev libsdl2-dev libopenal-dev libogg-dev libvorbis-dev libflac-dev libflac++-dev libmodplug-dev libmpg123-dev libmng-dev libturbojpeg libtheora-dev
+sudo apt-get install libturbojpeg0 # yes, ...0
 cd ~/Downloads/ || return
 wget "https://bitbucket.org/rude/love/downloads/love-0.10.2-linux-src.tar.gz"
 tar -xvzf love*
