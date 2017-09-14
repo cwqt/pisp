@@ -1,9 +1,8 @@
 # PiSP
 Open-source PSP like console.
 
-- KiCAD schematics
-- PiSPOS
-- Notes
+- EasyEDA schematics
+- pipaOS w/ fbtft & PiSPWM
 
 ![PiSP](PiSP.gif)
 
