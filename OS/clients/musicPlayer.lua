@@ -12,7 +12,7 @@ function musicPlayer_LOAD()
 
     for k, filename in ipairs(music.files) do
         -- Insert all tracks and show them all
-        music.tracks[#music.tracks+1] = {filename, track=love.audio.newSource("music/" .. filename, show=true)}
+        music.tracks[#music.tracks+1] = {filename, track=love.audio.newSource("music/" .. filename), show=true}
     end
 end
 
@@ -26,9 +26,9 @@ function musicPlayer_DRAW()
             imgui.SameLine()
 
             if imgui.Button("Search") then
-                for k, filename in ipairs(music.tracks)
+                for k, filename in ipairs(music.tracks) do
                     -- Filter results by checking against current search contents
-                    if string.match(filename[1], music.searchQuery) then
+                    if string.find(filename[1], music.searchQuery) then
                         filename.show = true
                     else
                         filename.show = false
@@ -39,7 +39,7 @@ function musicPlayer_DRAW()
             imgui.Text("Directory: music/")
             imgui.Separator()
 
-            imgui.BeginChild("one", imgui.GetWindowContentRegionWidth(), 110, false, {"HorizontalScrollbar", "NoBorder"})
+            imgui.BeginChild("one", imgui.GetWindowContentRegionWidth(), 70, false, {"HorizontalScrollbar", "NoBorder"})
             --imgui.SetScrollHere();
             for i, filename in ipairs(music.tracks) do
                 if filename.show then

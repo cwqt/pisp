@@ -3,15 +3,6 @@
 require "imgui"
 Gamestate = require("libs.hump.gamestate")
 
---[[
-    for the record I really despise programming like this,
-    normally I would OOP-ise each client but since imgui is
-    immediate mode and love-imgui is a hacked on module
-    it's not possible - also don't fuck me for using systemD.
-
-    thus, beware ye who enter...
-]]
-
 require("games.pong")
 
 require("clients.login")
@@ -37,8 +28,8 @@ function PiSPOS:init()
     startTime = love.timer.getTime()
     imgui.SetGlobalFontFromFileTTF("gohu.ttf", 11, 1, 1)
     PiSP = {
-        version = "0.3.4",
-		wallpaper = love.graphics.newImage("wallpaper.png")
+        version = "0.3.6",
+		wallpaper = love.graphics.newImage("spook.png")
     }
 end
 
@@ -69,8 +60,8 @@ function PiSPOS:draw()
     love.graphics.clear(100, 100, 100, 255)
 
     love.graphics.push()
-        love.graphics.scale(0.6)
-        love.graphics.draw(PiSP.wallpaper, 0, 0)
+        love.graphics.scale(0.16)
+        love.graphics.draw(PiSP.wallpaper, 1300, 200)
     love.graphics.pop()
 
     login_DRAW()
@@ -137,7 +128,6 @@ function PiSPOS:draw()
     end
     imgui.PopStyleVar()
     imgui.Render()
-
 end
 
 --

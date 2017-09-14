@@ -28,7 +28,7 @@ function about_DRAW()
                 imgui.BulletText("Mini 2-Axis Analog Thumbstick")
 
                 imgui.Text("Font: GohuFont, http://font.gohu.org/")
-                imgui.Text("\n19/08/17 - PiSPOS released under MIT")
+                imgui.Text("\n04/09/17 - PiSPOS released under MIT")
             imgui.EndChild()
         imgui.End()
     end

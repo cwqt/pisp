@@ -8,8 +8,26 @@ Open-source PSP like console.
 ![PiSP](PiSP.gif)
 
 ## Installation
+kind of outdated
 ```
 cd PiSP
 chmod +x install.sh
 ./install.sh
 ```
+
+## fbtft
+raspbian bloat comes with fbtft and x working, love fps is poor though
+
+- install fbtft_device kernel module somehow
+- enable spi (raspi-config)
+- sudo modprobe fbtft_device name=adafruit22a rotate=270
+- edit framebuffer to use /dev/fb1, check fbtft config for how...
+
+## pilove
+install pilove 0.4 image
+lsblk, lists sd card
+/dev/sdb = sd card, then
+sudo cfdisk /dev/sdb
+remove all partitions then copy image over
+sudo dd bs=4M if=pilove...image.iso of=/dev/sdb conv=fsync
+dd takes a while

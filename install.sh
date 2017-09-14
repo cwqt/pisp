@@ -38,10 +38,6 @@ git clone https://github.com/slages/love-imgui.git
 cd love-imgui/ || return
 cmake ./
 make
-mv imgui.so ~/.local/share/love/
-
-echo "Installing PiSPOS"
-cd ~/ || return
-git clone https://github.com/twentytwoo/PiSP.git
+cp imgui.so ~/.local/share/love/imgui.so
 
 echo "Installation complete"

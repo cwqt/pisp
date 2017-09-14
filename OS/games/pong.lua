@@ -22,7 +22,7 @@ love.graphics.setBackgroundColor(135,206,250)
 love.mouse.setVisible(false)
 
 player = {
-    x = 40,
+    x = 20,
     y = screen.H/2-50,
     w = 10,
     h = 50,
@@ -39,7 +39,7 @@ player = {
         }
 }
 ai = {
-    x = screen.W-player.w-40,
+    x = screen.W-player.w-20,
     y = screen.H/2-player.h/2,
     w = player.w,
     h = player.h,
