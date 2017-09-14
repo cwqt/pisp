@@ -1,9 +1,8 @@
 # PiSP
 Open-source PSP like console.
 
-- KiCAD schematics
-- PiSPOS
-- Notes
+- EasyEDA schematics
+- pipaOS w/ fbtft & PiSPWM
 
 ![PiSP](PiSP.gif)
 
@@ -14,6 +13,7 @@ cd PiSP
 chmod +x install.sh
 ./install.sh
 ```
+<<<<<<< HEAD
 
 ## fbtft
 raspbian bloat comes with fbtft and x working, love fps is poor though
@@ -31,3 +31,5 @@ sudo cfdisk /dev/sdb
 remove all partitions then copy image over
 sudo dd bs=4M if=pilove...image.iso of=/dev/sdb conv=fsync
 dd takes a while
+=======
+>>>>>>> fec599cb4d92673bcefe54ef871cc88faccd7848
