@@ -1,7 +1,8 @@
 --  https://github.com/ocornut/imgui/blob/master/imgui_demo.cpp
--- GetWindowContentRegionMax().x
 require "imgui"
 Gamestate = require("libs.hump.gamestate")
+Camera = require("libs.hump.camera")
+CScreen = require "libs.cscreen"
 
 require("games.pong")
 
@@ -17,6 +18,10 @@ require("clients.fileManager")
 require("clients.editor")
 require("clients.feh")
 
+
+page = require("os.page")
+icon = require("os.icon")
+
 clients = {}
 screen = {
     W = love.graphics.getWidth(),
@@ -29,12 +34,15 @@ function PiSPOS:init()
     imgui.SetGlobalFontFromFileTTF("gohu.ttf", 11, 1, 1)
     PiSP = {
         version = "0.3.6",
-		wallpaper = love.graphics.newImage("spook.png")
+		wallpaper = love.graphics.newImage("spook.png"),
+        currentPage = 1,
+        currentClient = 1
     }
 end
 
 function PiSPOS:enter()
-    -- screaming
+    CScreen.init(320, 240, true)
+
     feh_LOAD()
     editor_LOAD()
     fileManager_LOAD()
@@ -47,6 +55,17 @@ function PiSPOS:enter()
     login_LOAD()
 
     clients.ReturnToPiSPMenu = false
+
+    pages = {}
+    table.insert(pages, page:new({
+        { clients.feh, "Console", "images/48/star-48.png" },
+        { clients.feh, "Editor", "images/48/edit-48.png" },
+        { clients.feh, "Files", "images/48/documents-48.png" },
+        { clients.feh, "Games", "images/48/play-48.png" },
+        { clients.feh, "Input tester", "images/48/settings-48.png" },
+        { clients.feh, "Metrics", "images/48/utilities-48.png" }
+    }))
+    PiSPCamera = Camera(320/2, 240/2, 1)
 end
 
 function PiSPOS:update(dt)
@@ -54,80 +73,50 @@ function PiSPOS:update(dt)
 end
 
 function PiSPOS:draw()
-    imgui.PushStyleVar("WindowRounding", 0)
-
     local status -- ??
+    imgui.PushStyleVar("WindowRounding", 0)
     love.graphics.clear(100, 100, 100, 255)
 
-    love.graphics.push()
-        love.graphics.scale(0.16)
-        love.graphics.draw(PiSP.wallpaper, 1300, 200)
-    love.graphics.pop()
+    CScreen.apply()
 
-    login_DRAW()
+        love.graphics.push()
+            love.graphics.scale(0.1)
+            love.graphics.draw(PiSP.wallpaper, 2500, 1100)
+        love.graphics.pop()
+        login_DRAW()
 
-    if userAuthenticated then
-        if imgui.BeginMainMenuBar() then
-            if imgui.BeginMenu("Menu") then
-                    if imgui.MenuItem("Files") then clients.fileManager = true end
-                    if imgui.MenuItem("Editor") then clients.editor = true end
-                    if imgui.MenuItem("Console") then clients.console = true end
-                    if imgui.MenuItem("Metrics") then clients.imguiMetrics = true end
-                    imgui.Separator();
-                    if imgui.MenuItem("Log out") then userAuthenticated = false end
-                    if imgui.BeginMenu("Power") then
-                        -- systemD has its uses...
-                        if imgui.MenuItem("Shutdown") then
-                            os.execute("systemctl poweroff")
-                        end
-                        if imgui.MenuItem("Restart") then
-                            os.execute("systemctl reboot")
-                        end
-                        if imgui.MenuItem("Sleep") then
-                            os.execute("systemctl suspend")
-                        end
-                        imgui.EndMenu()
-                    end
-                    if imgui.MenuItem("Quit PiSPOS") then love.quit() end
-                imgui.EndMenu();
+        if userAuthenticated then
+
+            love.graphics.print(os.date("%H:%M%P"), screen.W-60, 4)
+
+            PiSPCamera:attach()
+                for k, page in ipairs(pages) do
+                    page:draw()
+                end
+            PiSPCamera:detach()
+
+            -- more screaming
+            feh_DRAW()
+            editor_DRAW()
+            fileManager_DRAW()
+            console_DRAW()
+            imguiMetrics_DRAW()
+            inputTester_DRAW()
+            gameSelect_DRAW()
+            about_DRAW()
+            musicPlayer_DRAW()
+            screenFetch_DRAW()
+
+            if clients.demo then
+                imgui.ShowTestWindow(true)
             end
-            if (imgui.BeginMenu("Applications")) then
-                if imgui.MenuItem("Games") then clients.gameSelect = not clients.gameSelect end
-                if imgui.MenuItem("Music") then clients.musicPlayer = not clients.musicPlayer end
-                if imgui.MenuItem("screenFetch") then clients.screenFetch = not clients.screenFetch end
-                if imgui.MenuItem("Inputs") then clients.inputTester = not clients.inputTester end
-                imgui.EndMenu();
-            end
-            if (imgui.BeginMenu("Help")) then
-                    if imgui.MenuItem("About") then clients.about = not clients.about end
-                    if imgui.MenuItem("Demo") then clients.demo = not clients.demo end
-                imgui.EndMenu();
-            end
-            imgui.SameLine(imgui.GetWindowWidth()-60)
-            imgui.MenuItem(os.date("%H:%M%P"))
-            imgui.EndMainMenuBar()
+        else -- Not authenticated
+            muteAllOtherTracks()
         end
 
-        -- more screaming
-        feh_DRAW()
-        editor_DRAW()
-        fileManager_DRAW()
-        console_DRAW()
-        imguiMetrics_DRAW()
-        inputTester_DRAW()
-        gameSelect_DRAW()
-        about_DRAW()
-        musicPlayer_DRAW()
-        screenFetch_DRAW()
-
-        if clients.demo then
-            imgui.ShowTestWindow(true)
-        end
-    else -- Not authenticated
-        muteAllOtherTracks()
-    end
-    imgui.PopStyleVar()
-    imgui.Render()
+        imgui.PopStyleVar()
+        imgui.Render()
+    CScreen.cease()
 end
 
 --
@@ -205,3 +194,47 @@ function setFullscreen()
     imgui.SetNextWindowPos(0, 17)
     imgui.SetNextWindowSize(love.graphics.getWidth(), love.graphics.getHeight()-17)
 end
+--[[
+
+    if userAuthenticated then
+        if imgui.BeginMainMenuBar() then
+            if imgui.BeginMenu("Menu") then
+                    if imgui.MenuItem("Files") then clients.fileManager = true end
+                    if imgui.MenuItem("Editor") then clients.editor = true end
+                    if imgui.MenuItem("Console") then clients.console = true end
+                    if imgui.MenuItem("Metrics") then clients.imguiMetrics = true end
+                    imgui.Separator();
+                    if imgui.MenuItem("Log out") then userAuthenticated = false end
+                    if imgui.BeginMenu("Power") then
+                        -- systemD has its uses...
+                        if imgui.MenuItem("Shutdown") then
+                            os.execute("systemctl poweroff")
+                        end
+                        if imgui.MenuItem("Restart") then
+                            os.execute("systemctl reboot")
+                        end
+                        if imgui.MenuItem("Sleep") then
+                            os.execute("systemctl suspend")
+                        end
+                        imgui.EndMenu()
+                    end
+                    if imgui.MenuItem("Quit PiSPOS") then love.quit() end
+                imgui.EndMenu();
+            end
+            if (imgui.BeginMenu("Applications")) then
+                if imgui.MenuItem("Games") then clients.gameSelect = not clients.gameSelect end
+                if imgui.MenuItem("Music") then clients.musicPlayer = not clients.musicPlayer end
+                if imgui.MenuItem("screenFetch") then clients.screenFetch = not clients.screenFetch end
+                if imgui.MenuItem("Inputs") then clients.inputTester = not clients.inputTester end
+                imgui.EndMenu();
+            end
+            if (imgui.BeginMenu("Help")) then
+                    if imgui.MenuItem("About") then clients.about = not clients.about end
+                    if imgui.MenuItem("Demo") then clients.demo = not clients.demo end
+                imgui.EndMenu();
+            end
+            imgui.SameLine(imgui.GetWindowWidth()-60)
+            imgui.MenuItem(os.date("%H:%M%P"))
+            imgui.EndMainMenuBar()
+        end
+]]
