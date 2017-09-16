@@ -1,14 +1,13 @@
 local class = require('libs.middleclass.middleclass')
 
 local client = class('client')
-function client:initialize(name)
-	self.draw = false
+function client:initialize(windowTitle)
+	self.windowTitle = windowTitle
+	self.drawing = false
 end
 
 function client:draw()
-	if self.draw == true then
-		imgui.Text("test")
-	end
+	imgui.Text(tostring(self.windowTitle))
 end
 
 return client

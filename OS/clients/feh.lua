@@ -1,4 +1,8 @@
-function feh_LOAD()
+local class = require("libs.middleclass.middleclass")
+
+
+
+--[[function feh_LOAD()
 	feh = {
 		currentImage = ""
 	}
@@ -15,4 +19,4 @@ function feh_DRAW()
 	        end
 		imgui.End()
 	end
-end
+end]]
