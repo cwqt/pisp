@@ -1,22 +1,17 @@
-local class = require("libs.middleclass.middleclass")
+local class = require('libs.middleclass.middleclass')
+local client = require('os.client')
 
-
-
---[[function feh_LOAD()
-	feh = {
-		currentImage = ""
-	}
+local feh = class('client')
+function feh:initialize()
+	self.feh = { currentImage = "" }
 end
 
-function feh_DRAW()
-	if clients.feh then
-		setFullscreen()
-		status, clients.feh = imgui.Begin("feh", true, {"AlwaysAutoResize"})
-			if type(feh.currentImage) == "userdata" then
-	            imgui.Image(feh.currentImage, imgui.GetWindowWidth()-31, imgui.GetWindowHeight())
-	        else
-	        	imgui.Text("No image")
-	        end
-		imgui.End()
-	end
-end]]
+function feh:draw()
+	if type(self.feh.currentImage) == "userdata" then
+        imgui.Image(self.feh.currentImage, imgui.GetWindowWidth()-31, imgui.GetWindowHeight())
+    else
+    	imgui.Text("No image")
+    end
+end
+
+return feh

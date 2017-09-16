@@ -374,7 +374,7 @@ function pong:draw()
 
 
     local status
-    if clients.ReturnToPiSPMenu then
+    if PiSP.ReturnToPiSPMenu then
         imgui.SetNextWindowPos(10, 10)
         --imgui.SetNextWindowSize(screen.W/2, screen.H/4)
         imgui.Begin("Return to PiSP", false, {"NoTitleBar", "AlwaysAutoResize"})
@@ -384,7 +384,7 @@ function pong:draw()
             end
             imgui.SameLine()
             if imgui.Button("No") then
-                clients.ReturnToPiSPMenu = false
+                PiSP.ReturnToPiSPMenu = false
             end
         imgui.End()
     end

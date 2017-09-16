@@ -1,34 +1,28 @@
 --  https://github.com/ocornut/imgui/blob/master/imgui_demo.cpp
 require "imgui"
 Gamestate = require("libs.hump.gamestate")
-Camera = require("libs.hump.camera")
+Camera  = require("libs.hump.camera")
 CScreen = require("libs.cscreen")
-flux = require("libs.flux.flux")
-lume = require("libs.lume.lume")
+flux    = require("libs.flux.flux")
+lume    = require("libs.lume.lume")
 
---require("games.pong")
+require("games.pong")
 
---[[
-require("clients.login")
-require("clients.musicPlayer")      -DONE
-require("clients.about")            -DONE
-require("clients.gameSelect")       -DONE
-require("clients.inputTester")      -DONE
-require("clients.screenFetch")      -DONE
-require("clients.imguiMetrics")     -DONE
-require("clients.console")          -DONE
-require("clients.fileManager")      -DONE
-require("clients.editor")           -DONE
-]]
+-- OS
+page    = require("os.page")
+icon    = require("os.icon")
+client  = require("os.client")
 
-page = require("os.page")
-icon = require("os.icon")
-client = require("os.client")
-
-screen = {
-    W = love.graphics.getWidth(),
-    H = love.graphics.getHeight()
-}
+-- Programs
+about   = require("clients.about")
+console = require("clients.console")
+editor  = require("clients.editor")
+music   = require("clients.music")
+files   = require("clients.files")
+metrics = require("clients.metrics")
+inputs  = require("clients.inputs")
+games   = require("clients.games")
+feh     = require("clients.feh")
 
 PiSPOS = {}
 function PiSPOS:init()
@@ -37,33 +31,34 @@ function PiSPOS:init()
     PiSP = {
         userAuthenticated = true,
         version = "0.3.6",
-		wallpaper = love.graphics.newImage("spook.png"),
         pageNo = 0,
         currentPage = 1,
         currentSlot = 1,
+		wallpaper = love.graphics.newImage("spook.png"),
         font = love.graphics.newFont("os/GTPMR.ttf", 14)
     }
+
+    pages = {}
+    table.insert(pages, page:new({
+        { games:new(),      "Games",   "images/Luv/categories/32/games.png" },
+        { console:new(),    "Console", "images/Luv/apps/48/terminal.png" },
+        { editor:new(),     "Editor",  "images/Luv/categories/32/editor.png" },
+        { files:new(),      "Files",   "images/Luv/apps/48/filemanager.png" },
+        { music:new(),      "Music",   "images/Luv/apps/32/music.png" },
+        { metrics:new(),    "Metrics", "images/Luv/apps/32/metrics.png" }
+    }))
+    table.insert(pages, page:new({
+        { inputs:new(),     "Inputs",   "images/Luv/actions/32/inputs.png" },
+        { about:new(),      "About",    "images/Luv/status/48/about.png" },
+        { feh:new(),         "feh",      "images/Luv/apps/32/feh.png" },
+        { nil,              "Networks", "images/Luv/apps/32/networking.png" },
+        { nil,              "PICO-8",   "images/pico8.png" },
+    }))
 end
 
 function PiSPOS:enter()
     CScreen.init(320, 240, true)
     love.graphics.setFont(PiSP.font)
-    pages = {}
-    table.insert(pages, page:new({
-        { client:new("testing"), "Games", "images/Luv/categories/32/games.png" },
-        { nil, "Console", "images/Luv/apps/48/terminal.png" },
-        { nil, "Editor", "images/Luv/categories/32/editor.png" },
-        { nil, "Files", "images/Luv/apps/48/filemanager.png" },
-        { nil, "Music", "images/Luv/apps/32/music.png" },
-        { nil, "Metrics", "images/Luv/apps/32/metrics.png" }
-    }))
-    table.insert(pages, page:new({
-        { nil, "Input tester", "images/Luv/actions/32/inputs.png" },
-        { nil, "About", "images/Luv/status/48/about.png" },
-        { nil, "Networks", "images/Luv/apps/32/networking.png" },
-        { nil, "feh", "images/Luv/apps/32/feh.png" },
-        { nil, "PICO-8", "images/pico8.png" },
-    }))
 
     PiSPCamera = Camera(screen.W/2, screen.H/2)
     pages[1].slots[1].focused = true
@@ -91,30 +86,6 @@ function PiSPOS:draw()
     imgui.PushStyleVar("WindowRounding", 0)
     love.graphics.clear(50, 50, 50, 255)
 
-    for k, slot in ipairs(pages[PiSP.currentPage].slots) do
-        if type(slot.client) == "table" then
-            if slot.client.drawing then
-                imgui.SetNextWindowPos(0, 0)
-                imgui.SetNextWindowSize(love.graphics.getWidth(), love.graphics.getHeight())
-                status, slot.client.drawing = imgui.Begin(tostring(slot.client.windowTitle), true, {"AlwaysAutoResize", "NoTitleBar"})
-                    slot.client:draw()
-                imgui.End()
-            end
-        end
-    end
-
-    --[[
-    for k, client in ipairs(pages) do
-        if client.drawing then
-            imgui.SetNextWindowPos(0, 0)
-uyyyyhhz            imgui.SetNextWindowSize(love.graphics.getWidth(), love.graphics.getHeight())
-            status, client.drawing = imgui.Begin(tostring(client.windowTitle), true, {"AlwaysAutoResize"})
-                client:draw()
-            imgui.End()
-        end
-    end
-    ]]
-
     CScreen.apply()
         love.graphics.push()
             love.graphics.scale(0.1)
@@ -133,9 +104,23 @@ uyyyyhhz            imgui.SetNextWindowSize(love.graphics.getWidth(), love.graph
         else -- Not authenticated
             muteAllOtherTracks()
         end
-        imgui.PopStyleVar()
-        imgui.Render()
     CScreen.cease()
+
+    -- BUG: currently renders all content inside one imgui window
+    for k, slot in ipairs(pages[PiSP.currentPage].slots) do
+        if type(slot.client) == "table" then
+            if slot.client.drawing then
+                imgui.SetNextWindowPos(0,0)
+                imgui.SetNextWindowSize(love.graphics.getWidth(), love.graphics.getHeight())            -- "MenuBar"
+                status, slot.client.drawing = imgui.Begin(tostring(slot.client.windowTitle), true, {"AlwaysAutoResize", "NoTitleBar"})
+                    slot.client:draw()
+                imgui.End()
+            end
+        end
+    end
+    imgui.PopStyleVar()
+    imgui.Render()
+
 end
 
 --
@@ -149,12 +134,11 @@ end
 
 function love.keypressed(key)
     imgui.KeyPressed(key)
-    --inputTesterKeys[#inputTesterKeys+1] = {key, love.timer.getTime()}
 
+    -- Load clients if one exists for the icon, toggle it with space (temporary)
     if key == "space" and type(pages[PiSP.currentPage].slots[PiSP.currentSlot].client) == "table" then
         pages[PiSP.currentPage].slots[PiSP.currentSlot].client.drawing = not pages[PiSP.currentPage].slots[PiSP.currentSlot].client.drawing
     end
-
 
     -- UI programming is awful
     if key == "w" or key == "s" or key == "a" or key =="d" then
@@ -202,7 +186,7 @@ end
 function love.keyreleased(key)
     imgui.KeyReleased(key)
     if key == "p" and Gamestate.current() ~= PiSPOS then
-        clients.ReturnToPiSPMenu = true
+        PiSP.ReturnToPiSPMenu = true
     end
     if not imgui.GetWantCaptureKeyboard() then
     end
@@ -241,6 +225,10 @@ end
 --
 function love.load()
     collectgarbage()
+    screen = {
+        W = love.graphics.getWidth(),
+        H = love.graphics.getHeight()
+    }
     Gamestate.registerEvents()
     Gamestate.switch(PiSPOS)
 end

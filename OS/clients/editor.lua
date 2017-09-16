@@ -1,46 +1,46 @@
-function editor_LOAD()
-	editor = {
+local class = require('libs.middleclass.middleclass')
+local client = require('os.client')
+
+local editor = class('client')
+function editor:initialize()
+    client.initialize(self)
+	self.editor = {
 		viewingFile = "",
 		editing = false,
 		editedValue = ""
 	}
 end
 
-function editor_DRAW()
-	if clients.editor then
-		setFullscreen()
-		status, clients.editor = imgui.Begin("Editor", true, {"AlwaysAutoResize", "MenuBar"})
+function editor:draw()
+    if imgui.BeginMenuBar() then
+        if imgui.BeginMenu("File") then
+			if imgui.MenuItem("New") then
 
-        if imgui.BeginMenuBar() then
-            if imgui.BeginMenu("File") then
-				if imgui.MenuItem("New") then
-
-				end
-				if imgui.MenuItem("Edit") then
-					editor.editing = not editor.editing
-					editor.editedValue = tostring(love.filesystem.read(editor.viewingFile))
-				end
-				if imgui.MenuItem("Save") then
-					if editor.editing then
-						love.filesystem.write(editor.viewingFile, editor.editedValue, 10000)
-					end
-				end
-                imgui.EndMenu();
-            end
-            imgui.EndMenuBar()
-        end
-
-		if love.filesystem.isFile(editor.viewingFile) then
-			if editor.editing then
-		        status, editor.editedValue = imgui.InputTextMultiline("", editor.editedValue, 100000, imgui.GetWindowWidth()-15, imgui.GetWindowHeight()-50);
-			else
-				imgui.TextWrapped(love.filesystem.read(editor.viewingFile), 100000)
 			end
+			if imgui.MenuItem("Edit") then
+				self.editor.editing = not self.editor.editing
+				self.editor.editedValue = tostring(love.filesystem.read(self.editor.viewingFile))
+			end
+			if imgui.MenuItem("Save") then
+				if self.editor.editing then
+					love.filesystem.write(self.editor.viewingFile, self.editor.editedValue, 10000)
+				end
+			end
+            imgui.EndMenu();
+        end
+        imgui.EndMenuBar()
+    end
+
+
+	if love.filesystem.isFile(self.editor.viewingFile) then
+		if self.editor.editing then
+	        status, self.editor.editedValue = imgui.InputTextMultiline("", self.editor.editedValue, 100000, imgui.GetWindowWidth()-15, imgui.GetWindowHeight()-50);
 		else
-			imgui.Text("No file selected.")
+			imgui.TextWrapped(love.filesystem.read(self.editor.viewingFile), 100000)
 		end
-		imgui.End()
 	else
-		editor.editing = false
+		imgui.Text("No file selected.")
 	end
 end
+
+return editor
