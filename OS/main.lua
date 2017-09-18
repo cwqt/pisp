@@ -96,6 +96,7 @@ function PiSPOS:update(dt)
 end
 
 function PiSPOS:draw()
+    CScreen.apply()
     local status -- ??
     imgui.PushStyleVar("WindowRounding", 0)
     love.graphics.clear(40, 40, 40, 255)
@@ -103,7 +104,6 @@ function PiSPOS:draw()
     love.graphics.print(screen.W, 10, 20)
     love.graphics.print(screen.H, 10, 40)
 
-    CScreen.apply()
         love.graphics.push()
             love.graphics.scale(0.1)
             --love.graphics.draw(PiSP.wallpaper, 2500, 1100)
@@ -121,8 +121,6 @@ function PiSPOS:draw()
         else -- Not authenticated
             muteAllOtherTracks()
         end
-    CScreen.cease()
-
     --imgui.ShowTestWindow(true)
 
     -- Crappy solution that allows one client open per page, see love.keypressed...
@@ -138,15 +136,14 @@ function PiSPOS:draw()
         end
     end
 
-    CScreen.apply()
         -- Draw system objects, batteries, power off etc.
         for k, object in ipairs(systemObjects) do
             object:draw()
         end
-    CScreen.cease()
 
     imgui.PopStyleVar()
     imgui.Render()
+    CScreen.cease()
 end
 
 function PiSPOS:keypressed(key)
