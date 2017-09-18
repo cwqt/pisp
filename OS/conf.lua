@@ -8,8 +8,8 @@ function love.conf(t)
 
     t.window.title = "PiSP OS"         -- The window title (string)
     t.window.icon = nil                -- Filepath to an image to use as the window's icon (string)
-    t.window.width = 720
-    t.window.height = 480
+    t.window.width = 320
+    t.window.height = 240
                         -- 320*2.5 = 800, use camera in production scale 1/2.5
 
     t.window.borderless = true         -- Remove all border visuals from the window (boolean)

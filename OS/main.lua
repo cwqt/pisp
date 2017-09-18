@@ -2,7 +2,6 @@
 require "imgui"
 Gamestate = require("libs.hump.gamestate")
 Camera  = require("libs.hump.camera")
-CScreen = require("libs.cscreen")
 flux    = require("libs.flux.flux")
 lume    = require("libs.lume.lume")
 
@@ -67,9 +66,7 @@ function PiSPOS:init()
 end
 
 function PiSPOS:enter()
-    CScreen.init(320, 240, false)
     love.graphics.setFont(PiSP.font)
-
     PiSPCamera = Camera(screen.W/2, screen.H/2)
     pages[1].slots[1].focused = true
 end
@@ -96,17 +93,13 @@ function PiSPOS:update(dt)
 end
 
 function PiSPOS:draw()
-    CScreen.apply()
     local status -- ??
     imgui.PushStyleVar("WindowRounding", 0)
     love.graphics.clear(40, 40, 40, 255)
 
-    love.graphics.print(screen.W, 10, 20)
-    love.graphics.print(screen.H, 10, 40)
-
         love.graphics.push()
             love.graphics.scale(0.1)
-            --love.graphics.draw(PiSP.wallpaper, 2500, 1100)
+            love.graphics.draw(PiSP.wallpaper, 2500, 1100)
         love.graphics.pop()
         if PiSP.userAuthenticated then
             love.graphics.print(os.date("%H:%M%P"), screen.W-65, 4)
@@ -136,14 +129,13 @@ function PiSPOS:draw()
         end
     end
 
-        -- Draw system objects, batteries, power off etc.
-        for k, object in ipairs(systemObjects) do
-            object:draw()
-        end
+    -- Draw system objects, batteries, power off etc.
+    for k, object in ipairs(systemObjects) do
+        object:draw()
+    end
 
     imgui.PopStyleVar()
     imgui.Render()
-    CScreen.cease()
 end
 
 function PiSPOS:keypressed(key)
