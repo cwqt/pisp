@@ -77,7 +77,7 @@ function music:draw()
     end
     imgui.SameLine()
     if imgui.Button("Next") then
-        muteAllOtherTracks()
+        self:muteAllOtherTracks()
         if self.music.tracks[self.music.currentTrackKey+1] ~= nil then
             self.music.currentTrackKey = self.music.currentTrackKey + 1
         else
@@ -88,12 +88,12 @@ function music:draw()
 
     -- just strips the last 4 chars off the string
     imgui.Text("Currently playing: " .. string.sub(self.music.tracks[self.music.currentTrackKey][1], 1, string.len(self.music.tracks[self.music.currentTrackKey][1])-4))
-    status, music.volume = imgui.SliderFloat("Volume", self.music.volume, 0, 1)
+    status, self.music.volume = imgui.SliderFloat("Volume", self.music.volume, 0, 1)
     if type(self.music.tracks[self.music.currentTrackKey].track) == "userdata" then
         self.music.tracks[self.music.currentTrackKey].track:setVolume( self.music.volume )
     end
     -- Get current and end time of currently playing track
-    status, self.music.currentTime = imgui.SliderFloat(secondsToClock(self.music.tracks[self.music.currentTrackKey].track:tell("seconds")) .. "-" .. secondsToClock(self.music.tracks[self.music.currentTrackKey].track:getDuration("seconds")), self.music.tracks[self.music.currentTrackKey].track:tell("seconds"), 0, self.music.tracks[self.music.currentTrackKey].track:getDuration("seconds"))
+    status, self.music.currentTime = imgui.SliderFloat(self:secondsToClock(self.music.tracks[self.music.currentTrackKey].track:tell("seconds")) .. "-" .. self:secondsToClock(self.music.tracks[self.music.currentTrackKey].track:getDuration("seconds")), self.music.tracks[self.music.currentTrackKey].track:tell("seconds"), 0, self.music.tracks[self.music.currentTrackKey].track:getDuration("seconds"))
 end
 
 function music:muteAllOtherTracks() -- music.tracks[1].track
@@ -104,7 +104,7 @@ end
 
 --I'm lazy
 --https://gist.github.com/jesseadams/791673
-function secondsToClock(seconds)
+function music:secondsToClock(seconds)
   local seconds = tonumber(seconds)
 
   if seconds <= 0 then

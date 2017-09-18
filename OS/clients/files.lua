@@ -65,9 +65,9 @@ function files:draw()
 		-- Open files into windows with their respective extension
 		if imgui.Button("Open") then
 			local file = love.filesystem.newFileData(self.fileManager.selectedFile)
+			-- Integrate with musicPlayer
+			--[[
 			if file:getExtension() == "mp3" or file:getExtension() == "wav" or file:getExtension() == "ogg" then
-				-- Integrate with musicPlayer
-				--[[
 				muteAllOtherTracks()
 				clients.musicPlayer = true
 		        music.tracks[#music.tracks+1] = {file:getFilename(), track=love.audio.newSource(self.fileManager.selectedFile)}
@@ -82,8 +82,8 @@ function files:draw()
 			else
 				clients.editor = true
 				editor.viewingFile = self.fileManager.selectedFile
-			]]
 			end
+			]]
 		end
 		imgui.SameLine()
 

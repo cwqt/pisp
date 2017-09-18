@@ -3,6 +3,7 @@ local client = require('os.client')
 
 local feh = class('client')
 function feh:initialize()
+    client.initialize(self)
 	self.feh = { currentImage = "" }
 end
 

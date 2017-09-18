@@ -13,6 +13,10 @@ page    = require("os.page")
 icon    = require("os.icon")
 client  = require("os.client")
 
+-- System objects
+battery = require("os.objects.battery")
+power   = require("os.objects.power")
+
 -- Programs
 about   = require("clients.about")
 console = require("clients.console")
@@ -35,14 +39,15 @@ function PiSPOS:init()
         currentPage = 1,
         currentSlot = 1,
 		wallpaper = love.graphics.newImage("spook.png"),
-        font = love.graphics.newFont("os/GTPMR.ttf", 14)
+        font = love.graphics.newFont("os/GTPMR.ttf", 14),
+        imguiHasKeys = false
     }
 
     pages = {}
     table.insert(pages, page:new({
         { games:new(),      "Games",   "images/Luv/categories/32/games.png" },
         { console:new(),    "Console", "images/Luv/apps/48/terminal.png" },
-        { editor:new(),     "Editor",  "images/Luv/categories/32/editor.png" },
+        { editor:new({"MenuBar"}),     "Editor",  "images/Luv/categories/32/editor.png" },
         { files:new(),      "Files",   "images/Luv/apps/48/filemanager.png" },
         { music:new(),      "Music",   "images/Luv/apps/32/music.png" },
         { metrics:new(),    "Metrics", "images/Luv/apps/32/metrics.png" }
@@ -50,14 +55,19 @@ function PiSPOS:init()
     table.insert(pages, page:new({
         { inputs:new(),     "Inputs",   "images/Luv/actions/32/inputs.png" },
         { about:new(),      "About",    "images/Luv/status/48/about.png" },
-        { feh:new(),         "feh",      "images/Luv/apps/32/feh.png" },
+        { feh:new(),        "feh",      "images/Luv/apps/32/feh.png" },
         { nil,              "Networks", "images/Luv/apps/32/networking.png" },
         { nil,              "PICO-8",   "images/pico8.png" },
     }))
+
+    systemObjects = {
+        battery:new(60, 10, 5),
+        power:new(10, 210)
+    }
 end
 
 function PiSPOS:enter()
-    CScreen.init(320, 240, true)
+    CScreen.init(320, 240, false)
     love.graphics.setFont(PiSP.font)
 
     PiSPCamera = Camera(screen.W/2, screen.H/2)
@@ -79,12 +89,19 @@ function PiSPOS:update(dt)
     if pages[PiSP.currentPage].ax ~= nil then
         PiSPCamera:lockX(pages[PiSP.currentPage].ax+screen.W/2, Camera.smooth.damped(10))
     end
+
+    for k, object in ipairs(systemObjects) do
+        object:update(dt)
+    end
 end
 
 function PiSPOS:draw()
     local status -- ??
     imgui.PushStyleVar("WindowRounding", 0)
-    love.graphics.clear(50, 50, 50, 255)
+    love.graphics.clear(40, 40, 40, 255)
+
+    love.graphics.print(screen.W, 10, 20)
+    love.graphics.print(screen.H, 10, 40)
 
     CScreen.apply()
         love.graphics.push()
@@ -106,37 +123,48 @@ function PiSPOS:draw()
         end
     CScreen.cease()
 
-    -- BUG: currently renders all content inside one imgui window
+    --imgui.ShowTestWindow(true)
+
+    -- Crappy solution that allows one client open per page, see love.keypressed...
     for k, slot in ipairs(pages[PiSP.currentPage].slots) do
         if type(slot.client) == "table" then
             if slot.client.drawing then
                 imgui.SetNextWindowPos(0,0)
                 imgui.SetNextWindowSize(love.graphics.getWidth(), love.graphics.getHeight())            -- "MenuBar"
-                status, slot.client.drawing = imgui.Begin(tostring(slot.client.windowTitle), true, {"AlwaysAutoResize", "NoTitleBar"})
+                status, slot.client.drawing = imgui.Begin("none", true, {"AlwaysAutoResize", "NoTitleBar", unpack(slot.client.args)})
                     slot.client:draw()
                 imgui.End()
             end
         end
     end
+
+    CScreen.apply()
+        -- Draw system objects, batteries, power off etc.
+        for k, object in ipairs(systemObjects) do
+            object:draw()
+        end
+    CScreen.cease()
+
     imgui.PopStyleVar()
     imgui.Render()
-
 end
 
---
--- User inputs
---
-function love.textinput(t)
-    imgui.TextInput(t)
-    if not imgui.GetWantCaptureKeyboard() then
-    end
-end
-
-function love.keypressed(key)
-    imgui.KeyPressed(key)
-
-    -- Load clients if one exists for the icon, toggle it with space (temporary)
-    if key == "space" and type(pages[PiSP.currentPage].slots[PiSP.currentSlot].client) == "table" then
+function PiSPOS:keypressed(key)
+    -- Load clients if one exists for the icon
+    if key == "`" and type(pages[PiSP.currentPage].slots[PiSP.currentSlot].client) == "table" then
+        -- Stop drawing all current clients
+        for k, slot in ipairs(pages[PiSP.currentPage].slots) do
+            if type(slot.client) == "table" then
+                -- Be able to toggle the current client on and off, because later not
+                if slot.client ~= pages[PiSP.currentPage].slots[PiSP.currentSlot].client then
+                    -- Draw the client currently selected
+                    if slot.client.drawing then
+                        slot.client.drawing = false
+                    end
+                end
+            end
+        end
+        -- Draw the client that is currently selected
         pages[PiSP.currentPage].slots[PiSP.currentSlot].client.drawing = not pages[PiSP.currentPage].slots[PiSP.currentSlot].client.drawing
     end
 
@@ -158,7 +186,7 @@ function love.keypressed(key)
     elseif key == "a" then
         if PiSP.currentSlot == 1 then
             if type(pages[PiSP.currentPage-1]) == "table" then
-                PiSP.currentSlot = #pages[PiSP.currentPage].slots
+                PiSP.currentSlot = #pages[PiSP.currentPage].slots+1
                 PiSP.currentPage = PiSP.currentPage - 1
             end
         else
@@ -181,6 +209,20 @@ function love.keypressed(key)
             PiSP.currentSlot = PiSP.currentSlot - 3
         end
     end
+end
+
+
+--
+-- User inputs
+--
+function love.textinput(t)
+    imgui.TextInput(t)
+    if not imgui.GetWantCaptureKeyboard() then
+    end
+end
+
+function love.keypressed(key)
+    imgui.KeyPressed(key)
 end
 
 function love.keyreleased(key)
@@ -244,48 +286,3 @@ end
 function love.quit()
     imgui.ShutDown();
 end
-
---[[
-
-    if userAuthenticated then
-        if imgui.BeginMainMenuBar() then
-            if imgui.BeginMenu("Menu") then
-                    if imgui.MenuItem("Files") then clients.fileManager = true end
-                    if imgui.MenuItem("Editor") then clients.editor = true end
-                    if imgui.MenuItem("Console") then clients.console = true end
-                    if imgui.MenuItem("Metrics") then clients.imguiMetrics = true end
-                    imgui.Separator();
-                    if imgui.MenuItem("Log out") then userAuthenticated = false end
-                    if imgui.BeginMenu("Power") then
-                        -- systemD has its uses...
-                        if imgui.MenuItem("Shutdown") then
-                            os.execute("systemctl poweroff")
-                        end
-                        if imgui.MenuItem("Restart") then
-                            os.execute("systemctl reboot")
-                        end
-                        if imgui.MenuItem("Sleep") then
-                            os.execute("systemctl suspend")
-                        end
-                        imgui.EndMenu()
-                    end
-                    if imgui.MenuItem("Quit PiSPOS") then love.quit() end
-                imgui.EndMenu();
-            end
-            if (imgui.BeginMenu("Applications")) then
-                if imgui.MenuItem("Games") then clients.gameSelect = not clients.gameSelect end
-                if imgui.MenuItem("Music") then clients.musicPlayer = not clients.musicPlayer end
-                if imgui.MenuItem("screenFetch") then clients.screenFetch = not clients.screenFetch end
-                if imgui.MenuItem("Inputs") then clients.inputTester = not clients.inputTester end
-                imgui.EndMenu();
-            end
-            if (imgui.BeginMenu("Help")) then
-                    if imgui.MenuItem("About") then clients.about = not clients.about end
-                    if imgui.MenuItem("Demo") then clients.demo = not clients.demo end
-                imgui.EndMenu();
-            end
-            imgui.SameLine(imgui.GetWindowWidth()-60)
-            imgui.MenuItem(os.date("%H:%M%P"))
-            imgui.EndMainMenuBar()
-        end
-]]

@@ -2,8 +2,8 @@ local class = require('libs.middleclass.middleclass')
 local client = require('os.client')
 
 local editor = class('client')
-function editor:initialize()
-    client.initialize(self)
+function editor:initialize(args)
+    client.initialize(self, args)
 	self.editor = {
 		viewingFile = "",
 		editing = false,
