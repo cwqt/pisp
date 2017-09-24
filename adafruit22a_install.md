@@ -54,3 +54,20 @@ make sure to remove fbcon map from cmdline when using love else the console from
 
 sudo modprobe fbtft dma
 sudo modprobe fbtft_device name=adafruit22a rotate=270 fps=60 speed=48000000 -- gives approx 20fps
+
+when using fbcp add below snippet to /boot/config.txt to trick love into using 320x240
+
+```
+# uncomment if hdmi display is not detected and composite is being output
+hdmi_force_hotplug=1
+
+# uncomment to force a specific HDMI mode (this will force VGA)
+hdmi_group=2
+hdmi_mode=87
+hdmi_cvt=320 240 60 1 0 0 0
+```
+
+sudo useradd pi
+sudo passwd pi
+sudo mkdir /home/pi
+sudo usermod -aG sudo pi

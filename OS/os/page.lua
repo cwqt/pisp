@@ -3,8 +3,12 @@ local class = require('libs.middleclass.middleclass')
 local page = class('page')
 function page:initialize(clients)
 	self.slots = {}
+
 	for i=1, 6 do
 		if type(clients[i]) == "table" then
+			if type(clients[i][3]) ~= "string" then
+				clients[i][3] = "images/Luv/actions/22/close.png"
+			end
 			table.insert(self.slots, icon:new({ clients[i][1], tostring(clients[i][2]), love.graphics.newImage(clients[i][3]), PiSP.pageNo+1 }))
 		end
 	end

@@ -1,31 +1,52 @@
 --  https://github.com/ocornut/imgui/blob/master/imgui_demo.cpp
-require "imgui"
+GPIO      = require('periphery').GPIO
+            require "imgui"
+
 Gamestate = require("libs.hump.gamestate")
-Camera  = require("libs.hump.camera")
-flux    = require("libs.flux.flux")
-lume    = require("libs.lume.lume")
+Camera    = require("libs.hump.camera")
+flux      = require("libs.flux.flux")
+lume      = require("libs.lume.lume")
 
 require("games.pong")
 
 -- OS
-page    = require("os.page")
-icon    = require("os.icon")
-client  = require("os.client")
+page      = require("os.page")
+icon      = require("os.icon")
+client    = require("os.client")
 
 -- System objects
-battery = require("os.objects.battery")
-power   = require("os.objects.power")
+battery   = require("os.objects.battery")
+power     = require("os.objects.power")
 
 -- Programs
-about   = require("clients.about")
-console = require("clients.console")
-editor  = require("clients.editor")
-music   = require("clients.music")
-files   = require("clients.files")
-metrics = require("clients.metrics")
-inputs  = require("clients.inputs")
-games   = require("clients.games")
-feh     = require("clients.feh")
+about     = require("clients.about")
+console   = require("clients.console")
+editor    = require("clients.editor")
+music     = require("clients.music")
+files     = require("clients.files")
+metrics   = require("clients.metrics")
+inputs    = require("clients.inputs")
+games     = require("clients.games")
+feh       = require("clients.feh")
+settings  = require("clients.settings")
+screenfetch = require("clients.screenfetch")
+
+skipSplash = true
+
+if GPIO.onRPi then
+    controls = {
+        up = GPIO(12, "in"),
+        down = nil,
+        left = nil,
+        right = nil,
+        a = nil,
+        b = nil,
+        x = nil,
+        y = nil,
+        start = nil,
+        select = nil,
+    }
+end
 
 PiSPOS = {}
 function PiSPOS:init()
@@ -44,24 +65,28 @@ function PiSPOS:init()
 
     pages = {}
     table.insert(pages, page:new({
-        { games:new(),      "Games",   "images/Luv/categories/32/games.png" },
-        { console:new(),    "Console", "images/Luv/apps/48/terminal.png" },
-        { editor:new({"MenuBar"}),     "Editor",  "images/Luv/categories/32/editor.png" },
-        { files:new(),      "Files",   "images/Luv/apps/48/filemanager.png" },
-        { music:new(),      "Music",   "images/Luv/apps/32/music.png" },
-        { metrics:new(),    "Metrics", "images/Luv/apps/32/metrics.png" }
+        { games:new(),             "Games",    "images/Luv/categories/32/games.png" },
+        { console:new(),           "Console",  "images/Luv/apps/48/terminal.png" },
+        { editor:new({"MenuBar"}), "Editor",   "images/Luv/categories/32/editor.png" },
+        { files:new(),             "Files",    "images/Luv/apps/48/filemanager.png" },
+        { music:new(),             "Music",    "images/Luv/apps/32/music.png" },
+        { metrics:new(),           "Metrics",  "images/Luv/apps/32/metrics.png" }
     }))
     table.insert(pages, page:new({
-        { inputs:new(),     "Inputs",   "images/Luv/actions/32/inputs.png" },
-        { about:new(),      "About",    "images/Luv/status/48/about.png" },
-        { feh:new(),        "feh",      "images/Luv/apps/32/feh.png" },
-        { nil,              "Networks", "images/Luv/apps/32/networking.png" },
-        { nil,              "PICO-8",   "images/pico8.png" },
+        { inputs:new(),            "Inputs",   "images/Luv/actions/32/inputs.png" },
+        { about:new(),             "About",    "images/Luv/status/48/about.png" },
+        { feh:new(),               "feh",      "images/Luv/apps/32/feh.png" },
+        { settings:new(),          "Settings", "images/Luv/actions/48/settings.png" },
+        { nil,                     "Pico-8",   "images/pico8.png" },
+        { nil,                     "RetroPie", "images/RetroPie.png"}
+    }))
+    table.insert(pages, page:new({
+        { screenfetch:new(),       "screenFetch" },
     }))
 
     systemObjects = {
         battery:new(60, 10, 5),
-        power:new(10, 210)
+        power:new(10, 210),
     }
 end
 
@@ -77,11 +102,12 @@ function PiSPOS:update(dt)
     pages[PiSP.currentPage].slots[PiSP.currentSlot].focused = true
     for k, icon in ipairs(pages[PiSP.currentPage].slots) do
         if icon.focused == true then
-            flux.to(icon, 0.5, { r = math.rad(20) })
+            flux.to(icon, 0.2, { r = math.rad(20) })
         else
             flux.to(icon, 0.2, {r = 0})
         end
     end
+
     -- Check if a page exists, move to it when asked
     if pages[PiSP.currentPage].ax ~= nil then
         PiSPCamera:lockX(pages[PiSP.currentPage].ax+screen.W/2, Camera.smooth.damped(10))
@@ -99,7 +125,7 @@ function PiSPOS:draw()
 
         love.graphics.push()
             love.graphics.scale(0.1)
-            love.graphics.draw(PiSP.wallpaper, 2500, 1100)
+            --love.graphics.draw(PiSP.wallpaper, 2500, 1100)
         love.graphics.pop()
         if PiSP.userAuthenticated then
             love.graphics.print(os.date("%H:%M%P"), screen.W-65, 4)
@@ -134,6 +160,24 @@ function PiSPOS:draw()
         object:draw()
     end
 
+    PiSP.imguiHasKeys = false
+    -- A slow algo that detects if any client on any page is open
+    for i, page in pairs(pages) do
+    -- Check through all pages
+        for _, slots in pairs(pages[i]) do
+        -- And all their slots
+            for _, slot in pairs(page.slots) do
+                -- Verify a client exists
+                if type(slot.client) == "table" then
+                    -- Check if it's being drawn, disable background keys
+                    if slot.client.drawing == true then
+                        PiSP.imguiHasKeys = true
+                    end
+                end
+            end
+        end
+    end
+
     imgui.PopStyleVar()
     imgui.Render()
 end
@@ -157,45 +201,48 @@ function PiSPOS:keypressed(key)
         pages[PiSP.currentPage].slots[PiSP.currentSlot].client.drawing = not pages[PiSP.currentPage].slots[PiSP.currentSlot].client.drawing
     end
 
-    -- UI programming is awful
-    if key == "w" or key == "s" or key == "a" or key =="d" then
-        for i=1, #pages[PiSP.currentPage].slots do
-            pages[PiSP.currentPage].slots[i].focused = false
-        end
-    end
-    if key == "d" then
-        if PiSP.currentSlot == #pages[PiSP.currentPage].slots then
-            if type(pages[PiSP.currentPage+1]) == "table" then
-                PiSP.currentSlot = 1
-                PiSP.currentPage = PiSP.currentPage + 1
+    -- Only move around if no clients are open
+    if PiSP.imguiHasKeys == false then
+        -- UI programming is awful
+        if key == "w" or key == "s" or key == "a" or key =="d" then
+            for i=1, #pages[PiSP.currentPage].slots do
+                pages[PiSP.currentPage].slots[i].focused = false
             end
-        else
-            PiSP.currentSlot = PiSP.currentSlot + 1
         end
-    elseif key == "a" then
-        if PiSP.currentSlot == 1 then
-            if type(pages[PiSP.currentPage-1]) == "table" then
-                PiSP.currentSlot = #pages[PiSP.currentPage].slots+1
-                PiSP.currentPage = PiSP.currentPage - 1
+        if key == "d" then
+            if PiSP.currentSlot == #pages[PiSP.currentPage].slots then
+                if type(pages[PiSP.currentPage+1]) == "table" then
+                    PiSP.currentSlot = 1
+                    PiSP.currentPage = PiSP.currentPage + 1
+                end
+            else
+                PiSP.currentSlot = PiSP.currentSlot + 1
             end
-        else
-            PiSP.currentSlot = PiSP.currentSlot - 1
-        end
-    elseif key == "w" then
-        if PiSP.currentSlot >= 3 then
-            if pages[PiSP.currentPage].slots[PiSP.currentSlot-3] ~= nil then
-                PiSP.currentSlot = PiSP.currentSlot - 3
+        elseif key == "a" then
+            if PiSP.currentSlot == 1 then
+                if type(pages[PiSP.currentPage-1]) == "table" then
+                    PiSP.currentSlot = #pages[PiSP.currentPage].slots
+                    PiSP.currentPage = PiSP.currentPage - 1
+                end
+            else
+                PiSP.currentSlot = PiSP.currentSlot - 1
             end
-        else
-            PiSP.currentSlot = PiSP.currentSlot + 3
-        end
-    elseif key == "s" then
-        if PiSP.currentSlot <= 3 then
-            if pages[PiSP.currentPage].slots[PiSP.currentSlot+3] ~= nil then
+        elseif key == "w" then
+            if PiSP.currentSlot >= 3 then
+                if pages[PiSP.currentPage].slots[PiSP.currentSlot-3] ~= nil then
+                    PiSP.currentSlot = PiSP.currentSlot - 3
+                end
+            else
                 PiSP.currentSlot = PiSP.currentSlot + 3
             end
-        else
-            PiSP.currentSlot = PiSP.currentSlot - 3
+        elseif key == "s" then
+            if PiSP.currentSlot <= 3 then
+                if pages[PiSP.currentPage].slots[PiSP.currentSlot+3] ~= nil then
+                    PiSP.currentSlot = PiSP.currentSlot + 3
+                end
+            else
+                PiSP.currentSlot = PiSP.currentSlot - 3
+            end
         end
     end
 end
@@ -261,7 +308,7 @@ function love.load()
         H = love.graphics.getHeight()
     }
     Gamestate.registerEvents()
-    Gamestate.switch(PiSPOS)
+    Gamestate.switch(boot)
 end
 
 function love.update()
@@ -274,4 +321,38 @@ end
 
 function love.quit()
     imgui.ShutDown();
+end
+
+
+--
+-- Boot screen
+--
+boot = {}
+splashy = require('libs.splashy.splashy')
+
+function boot:init()
+    bootImages = {
+        love.graphics.newImage("images/pico8.png"),
+        love.graphics.newImage("images/pico8.png")
+    }
+    bootFont = love.graphics.newFont("os/GTPMR.ttf", 14)
+    love.graphics.setFont(bootFont)
+end
+
+function boot:enter()
+    if skipSplash then Gamestate.switch(PiSPOS) end
+    for _, image in ipairs(bootImages) do
+        splashy.addSplash(image, 1)
+    end
+    splashy.onComplete(function() Gamestate.switch(PiSPOS) end)
+end
+
+function boot:update(dt)
+    splashy.update(dt)
+end
+
+function boot:draw()
+    love.graphics.print("PiSPOS", 10, screen.H-25)
+    love.graphics.print("milk", screen.W-40, screen.H-25)
+    splashy.draw()
 end

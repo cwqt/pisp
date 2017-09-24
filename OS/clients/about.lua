@@ -15,18 +15,23 @@ function about:draw()
     imgui.Text("PiSPOS v." .. PiSP.version)
     imgui.Separator()
     imgui.BeginChild("About content")
-        imgui.TextWrapped("The PiSP is a open-source handheld game console inspired by PicoChip and the Sony PSP; created by May W. for the Level 3 EPQ.\n\n" ..
-                          "PiSPOS runs on the LÖVE Lua framework making heavy use of the 'dear imgui' immediate mode GUI.\n\n"..
+        imgui.TextWrapped("The PiSP is a open-source handheld game console inspired by PocketC.H.I.P. and the Sony PSP; created by May W. for the Level 3 EPQ.\n\n" ..
+                          "PiSPOS runs on the LÖVE Lua framework using the 'dear imgui' immediate mode GUI.\n\n"..
                           "You can find more documentation at: https://github.com/twentytwoo/PiSP\n\n")
-        imgui.Text("Libraries/Software used:")
-        imgui.BulletText("LÖVE,         https://love2d.org/")
-        imgui.BulletText("love-imgui,   https://github.com/slages/love-imgui")
-        imgui.BulletText("middleclass,  https://github.com/kikito/middleclass")
-        imgui.BulletText("HUMP,         https://github.com/vrld/hump")
+
+        imgui.Text("Software/Libraries used:")
+            imgui.BulletText("pipaOS & PiLove")
+            imgui.BulletText("lua-periphery v" .. GPIO.version)
+            imgui.BulletText("fbcp & fbtft")
+            imgui.BulletText("LÖVE,         https://love2d.org/")
+            imgui.BulletText("love-imgui,   https://github.com/slages/love-imgui")
+            imgui.BulletText("middleclass,  https://github.com/kikito/middleclass")
+            imgui.BulletText("HUMP,         https://github.com/vrld/hump")
+
         imgui.Text("\nHardware used:")
-        imgui.BulletText("Raspberry Pi Zero W")
-        imgui.BulletText('Adafruit 2.2" 18-bit color TFT LCD')
-        imgui.BulletText("Mini 2-Axis Analog Thumbstick")
+            imgui.BulletText("Raspberry Pi Zero W")
+            imgui.BulletText('Adafruit 2.2" 18-bit color TFT LCD')
+            imgui.BulletText("Mini 2-Axis Analog Thumbstick")
 
         imgui.Text("Font: GohuFont, http://font.gohu.org/")
         imgui.Text("\n04/09/17 - PiSPOS released under MIT")
