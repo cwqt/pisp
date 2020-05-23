@@ -23,10 +23,10 @@ raspbian bloat comes with fbtft and x working, love fps is poor though
 - edit framebuffer to use /dev/fb1, check fbtft config for how...
 
 ## pilove
-install pilove 0.4 image
-lsblk, lists sd card
-/dev/sdb = sd card, then
-sudo cfdisk /dev/sdb
-remove all partitions then copy image over
-sudo dd bs=4M if=pilove...image.iso of=/dev/sdb conv=fsync
+install pilove 0.4 image  
+lsblk, lists sd card  
+/dev/sdb = sd card, then  
+sudo cfdisk /dev/sdb  
+remove all partitions then copy image over  
+sudo dd bs=4M if=pilove...image.iso of=/dev/sdb conv=fsync  
 dd takes a while
